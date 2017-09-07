@@ -852,6 +852,9 @@ class DAGScheduler(
     listenerBus.post(SparkListenerTaskGettingResult(taskInfo))
   }
 
+  /*zilu
+    入口函数
+   */
   private[scheduler] def handleJobSubmitted(jobId: Int,
       finalRDD: RDD[_],
       func: (TaskContext, Iterator[_]) => _,
@@ -941,6 +944,12 @@ class DAGScheduler(
       if (!waitingStages(stage) && !runningStages(stage) && !failedStages(stage)) {
         val missing = getMissingParentStages(stage).sortBy(_.id)
         logDebug("missing: " + missing)
+        /*zilu
+        这里其实会反复递归调用
+        直到最初的stage，它没有父stage了
+        那么，此时，就会去首先提交这个第一个stage，stage0
+        其余的stage，此时全部都在waitingStages里面
+         */
         if (missing.isEmpty) {
           logInfo("Submitting " + stage + " (" + stage.rdd + "), which has no missing parents")
           submitMissingTasks(stage, jobId.get)
