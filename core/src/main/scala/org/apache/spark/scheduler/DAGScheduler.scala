@@ -947,13 +947,18 @@ class DAGScheduler(
         /*zilu
         这里其实会反复递归调用
         直到最初的stage，它没有父stage了
-        那么，此时，就会去首先提交这个第一个stage，stage0
+        那么，此时，就会去首先提交这个第一个stage，就是stage0
         其余的stage，此时全部都在waitingStages里面
          */
         if (missing.isEmpty) {
           logInfo("Submitting " + stage + " (" + stage.rdd + "), which has no missing parents")
           submitMissingTasks(stage, jobId.get)
         } else {
+          /*zilu
+          递归调用submit()方法，去提交父stage
+          这里的递归，就是stage划分算法的推动者和精髓
+          ！！！精髓、精髓、精髓
+           */
           for (parent <- missing) {
             submitStage(parent)
           }
@@ -966,6 +971,10 @@ class DAGScheduler(
   }
 
   /** Called when stage's parents are available and we can now do its task. */
+  /*zilu
+  这是一个很长的函数，来处理tasks
+
+   */
   private def submitMissingTasks(stage: Stage, jobId: Int) {
     logDebug("submitMissingTasks(" + stage + ")")
 
@@ -1084,6 +1093,10 @@ class DAGScheduler(
     if (tasks.size > 0) {
       logInfo(s"Submitting ${tasks.size} missing tasks from $stage (${stage.rdd}) (first 15 " +
         s"tasks are for partitions ${tasks.take(15).map(_.partitionId)})")
+      /*zilu
+      最后，针对stage的task，创建TaskSet对象，调用TaskScheduler的submitTasks()方法，提交TaskSet
+      默认情况下，我们的standalone模式，是使用的TaskSchedulerImpl，TaskScheduler只是一个trait
+       */
       taskScheduler.submitTasks(new TaskSet(
         tasks.toArray, stage.id, stage.latestInfo.attemptId, jobId, properties))
     } else {

@@ -178,10 +178,18 @@ private[spark] class TaskSchedulerImpl(
     waitBackendReady()
   }
 
+  /*zilu
+  TaskScheduler提交任务的入口
+   */
   override def submitTasks(taskSet: TaskSet) {
     val tasks = taskSet.tasks
     logInfo("Adding task set " + taskSet.id + " with " + tasks.length + " tasks")
     this.synchronized {
+      /*zilu
+      给每一个TaskSet，都会创建一个TaskSetManager
+      TaskSetManager实际上，在后面会负责它的那个Taskset的任务的执行和管理
+      然后加入内存缓存中
+       */
       val manager = createTaskSetManager(taskSet, maxTaskFailures)
       val stage = taskSet.stageId
       val stageTaskSets =

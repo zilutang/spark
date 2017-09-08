@@ -47,6 +47,12 @@ import org.apache.spark.util.collection.MedianHeap
  * @param maxTaskFailures if any particular task fails this number of times, the entire
  *                        task set will be aborted
  */
+
+/*zilu
+在TaskSchedulerImpl中，对一个单独的TaskSet的任务进行调度，这个类负责追踪每一个task，如果task失败的话，会负责重试task，
+直到超过重试的次数限制，并且会通过延迟调度，这个TaskSet处理本地化调度机制。它的主要接口是resourceOffer，
+在这个接口中，TaskSet会希望在一个节点上运行一个任务，并且接收任务的状态改变消息，来知道它负责的task的状态改变了。
+ */
 private[spark] class TaskSetManager(
     sched: TaskSchedulerImpl,
     val taskSet: TaskSet,

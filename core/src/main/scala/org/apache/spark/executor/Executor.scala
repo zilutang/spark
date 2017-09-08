@@ -168,8 +168,22 @@ private[spark] class Executor(
   private[executor] def numRunningTasks: Int = runningTasks.size()
 
   def launchTask(context: ExecutorBackend, taskDescription: TaskDescription): Unit = {
+    /*zilu
+    对于每一个task，都会创建一个TaskRunner
+    TaskRunner继承的是java的多线程中的Runable接口
+    实际上，无论是对于学习大数据的任何技术来说，包括hadoop生态、storm、spark
+    java都是非常重要的
+     */
     val tr = new TaskRunner(context, taskDescription)
+    // 将TaskRunner放入内存缓存
     runningTasks.put(taskDescription.taskId, tr)
+    /*zilu
+    java, ThreadPool, Executor内部有一个java线程池
+    然后，这里其实将task封装在一个线程中（TaskRunner）
+    直接将线程丢入线程池，进行执行
+    所以这里我们要知道，线程池是自动实现了排队机制的，也就是说，如果线程池内的线程暂时没有空闲的
+    那么丢进来的线程都是要排队的
+     */
     threadPool.execute(tr)
   }
 
